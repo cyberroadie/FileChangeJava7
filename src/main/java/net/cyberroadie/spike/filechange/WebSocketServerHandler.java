@@ -44,7 +44,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(WebSocketServerHandler.class);
 
     private static final String WEBSOCKET_PATH = "/websocket";
-    private WebSocketServerHandshaker handshaker;
+    private WebSocketServerHandshaker handshaker = null;
     private MathexRepository mathexRepository = null;
     private ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
 
@@ -125,7 +125,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
         if (frame instanceof TextWebSocketFrame) {
             mathexRepository.sendLast();
         } else if (frame instanceof CloseWebSocketFrame) {
-            handshaker.close(ctx.getChannel(), (CloseWebSocketFrame) frame);
+            if(handshaker != null) handshaker.close(ctx.getChannel(), (CloseWebSocketFrame) frame);
         } else if (frame instanceof PingWebSocketFrame) {
             ctx.getChannel().write(new PongWebSocketFrame(frame.getBinaryData()));
         } else {
@@ -152,5 +152,13 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
     private static String getWebSocketLocation(HttpRequest req) {
         return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
+    }
+
+    public MathexRepository getMathexRepository() {
+        return mathexRepository;
+    }
+
+    public void setMathexRepository(MathexRepository mathexRepository) {
+        this.mathexRepository = mathexRepository;
     }
 }

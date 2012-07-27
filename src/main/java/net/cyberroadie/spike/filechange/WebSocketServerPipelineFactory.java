@@ -18,8 +18,8 @@ public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
 
     MathexRepository mathexRepository;
 
-    public WebSocketServerPipelineFactory() throws FileNotFoundException {
-        mathexRepository = new MathexRepository("/Users/olivier/tmp/", "mathtex.log");
+    public WebSocketServerPipelineFactory(MathexRepository mathexRepository) throws FileNotFoundException {
+        this.mathexRepository = mathexRepository;
     }
 
     public ChannelPipeline getPipeline() throws Exception {

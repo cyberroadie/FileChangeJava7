@@ -27,32 +27,65 @@ public class MathexRepository implements Runnable {
     private boolean isRunning = false;
     private List<ChannelHandlerContext> channelContexts = new ArrayList<>();
     private String pathToWatch;
-    private BufferedReader input;
+    private File file;
+    private String mathtexService = "http://www.cyberroadie.org/cgi-bin/mathtex.cgi?";
 
     public MathexRepository(String pathToWatch, String fileToParse) throws FileNotFoundException {
         this.pathToWatch = pathToWatch;
-        this.input = new BufferedReader(new FileReader(pathToWatch + fileToParse));;
+        this.file = new File(pathToWatch + fileToParse);
     }
 
-    public List<String> tail(int maxLines) throws IOException {
-        String[] lines = new String[maxLines];
-        int lastNdx = 0;
-        for (String line = input.readLine(); line != null; line = input.readLine()) {
-            if (lastNdx == lines.length) {
-                lastNdx = 0;
-            }
-            lines[lastNdx++] = line;
-        }
+    public String tail(int lines) {
+        try {
+            RandomAccessFile fileHandler = new RandomAccessFile( file, "r" );
+            long fileLength = file.length() - 1;
+            StringBuilder sb = new StringBuilder();
+            int line = 0, delimiter = 0;
+            List<String> lastLines = new ArrayList<>();
 
-        List<String> mathexList = new ArrayList<>();
+            for( long filePointer = fileLength; filePointer != -1; filePointer-- ) {
+                fileHandler.seek( filePointer ); // end of file
+                int c = fileHandler.read();
 
-        for (int ndx = lastNdx; ndx != lastNdx - 1; ndx++) {
-            if (ndx == lines.length) {
-                ndx = 0;
+                if( c == '\r' ) {
+                    if (line == lines) {
+                        if (filePointer == fileLength) {
+                            continue;
+                        } else {
+                            lastLines.add(sb.reverse().toString());
+                            break;
+                        }
+                    }
+                } else if( c == '\n' ) {
+                    line = line + 1;
+                    if (line == lines) {
+                        if (filePointer == fileLength - 1) {
+                            continue;
+                        } else {
+                            lastLines.add(sb.reverse().toString());
+                            break;
+                        }
+                    }
+                    String reverse = sb.reverse().toString();
+                    if(reverse.endsWith("--------------\n")) {
+                        delimiter++;
+                    } else if (!reverse.endsWith(".gif\n") && !reverse.startsWith("http://") && !reverse.equals("")) {
+                        lastLines.add(reverse);
+                    }
+                    sb.delete(0, sb.length());
+                    if(delimiter == 2) break;
+                }
+                sb.append( ( char ) c );
             }
-            mathexList.add(lines[ndx]);
+
+//            sb.deleteCharAt(sb.length() - 1);
+
+            return lastLines.get(lastLines.size() - 1);
+        } catch( java.io.FileNotFoundException e ) {
+            return null;
+        } catch( java.io.IOException e ) {
+            return null;
         }
-        return mathexList;
     }
 
     @Override
@@ -67,7 +100,7 @@ public class MathexRepository implements Runnable {
                     ENTRY_DELETE,
                     ENTRY_MODIFY);
 
-            for (;;) {
+            for (; ; ) {
                 key = watchService.take();
                 if (key != null) {
                     for (WatchEvent<?> event : key.pollEvents()) {
@@ -88,24 +121,22 @@ public class MathexRepository implements Runnable {
 
     }
 
-    public String getLast() {
-        return "http://www.cyberroadie.org/cgi-bin/mathtex.cgi?\\sigma%20=%20{1%20\\over%20{2\\pi%20}}\\sqrt%20{{K%20\\over%20\\mu%20}}";
+    public String getLast() throws IOException {
+        return mathtexService + tail(8);
     }
 
     public void sendLast() {
-        for (ChannelHandlerContext channelContext : channelContexts) {
-            channelContext.getChannel().write(new TextWebSocketFrame(getLast()));
+        try {
+            for (ChannelHandlerContext channelContext : channelContexts) {
+                channelContext.getChannel().write(new TextWebSocketFrame(getLast()));
+            }
+        } catch (IOException ex) {
+
         }
     }
 
     public boolean isRunning() {
         return isRunning;
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
-        MathexRepository mathexRepository = new MathexRepository("/Users/olivier/tmp", "mathex.log");
-        threadExecutor.execute(mathexRepository);
     }
 
     public void addCtx(ChannelHandlerContext ctx) {

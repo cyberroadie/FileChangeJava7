@@ -10,9 +10,13 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 public class FileChangeServer {
 
     private final int port;
+    private String directory;
+    private String file;
 
-    public FileChangeServer(int port) {
+    public FileChangeServer(int port, String directory, String file) {
         this.port = port;
+        this.file = file;
+        this.directory = directory;
     }
 
     public void run() {
@@ -22,7 +26,7 @@ public class FileChangeServer {
                         Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
                 );
         try {
-            bootstrap.setPipelineFactory(new WebSocketServerPipelineFactory());
+            bootstrap.setPipelineFactory(new WebSocketServerPipelineFactory(new MathexRepository(directory, file)));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.exit(1);
@@ -34,11 +38,17 @@ public class FileChangeServer {
 
     public static void main(String[] args) {
         int port;
+        String directory = null;
+        String file;
+
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
+            directory = args[1];
+            file = args[2];
+            new FileChangeServer(port, directory, file).run();
         } else {
-            port = 8080;
+            System.out.println("Usage java -jar FileChangeServer.jar [port] [directory to watch] [file to parse]");
         }
-        new FileChangeServer(port).run();
+
     }
 }

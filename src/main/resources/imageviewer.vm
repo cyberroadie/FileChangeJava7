@@ -1,4 +1,11 @@
-<html><head><title>$title</title></head>
+<html>
+<head>
+    <title>$title</title>
+    <style type="text/css">
+        div{margin-right:auto;margin-left:auto;width:740px;}
+        body {background-color: #ffffff;}
+    </style>
+</head>
 <body>
 <script type="text/javascript">
     var socket;
@@ -7,29 +14,22 @@
     }
     if (window.WebSocket) {
         socket = new WebSocket("ws://localhost:8080/websocket");
-        socket.onmessage = function(event) {
+        socket.onmessage = function (event) {
             var imageArea = document.getElementById('imageOutput');
             var div = document.createElement('div');
-//            var text = document.createTextNode(event.data);
             var img = document.createElement("img")
             img.setAttribute('src', event.data)
             div.appendChild(img)
             document.body.insertBefore(div, imageArea)
         };
-//        socket.onopen = function(event) {
-//            var ta = document.getElementById('responseText');
-//            ta.value = "Web Socket opened!";
-//        };
-//        socket.onclose = function(event) {
-//            var ta = document.getElementById('responseText');
-//            ta.value = ta.value + "Web Socket closed";
-//        };
     } else {
-        alert("Your browser does not support Web Socket.");
+        alert("Your browser does not support Web Sockets.");
     }
 
     function send(message) {
-        if (!window.WebSocket) { return; }
+        if (!window.WebSocket) {
+            return;
+        }
         if (socket.readyState == WebSocket.OPEN) {
             socket.send(message);
         } else {
@@ -37,12 +37,6 @@
         }
     }
 </script>
-<form onsubmit="return false;">
-    <input type="text" name="message" value="Hello, World!"/><input type="button" value="Send Web Socket Data"
-                                                                    onclick="send(this.form.message.value)" />
-</form>
-<div id="imageArea">
-
-</div>
+<div id="imageArea"></div>
 </body>
 </html>
