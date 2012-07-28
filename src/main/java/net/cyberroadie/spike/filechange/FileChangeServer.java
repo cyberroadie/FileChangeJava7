@@ -1,6 +1,7 @@
 package net.cyberroadie.spike.filechange;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
@@ -30,6 +31,8 @@ public class FileChangeServer {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.exit(1);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         bootstrap.bind(new InetSocketAddress(port));
         bootstrap.setOption("child.tcpNoDelay", true);
