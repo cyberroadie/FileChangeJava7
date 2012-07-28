@@ -23,7 +23,7 @@ public class MathexRepositoryTest {
     }
 
     @Test
-    public void testReadRecord() throws Exception {
+    public void testReadRecords() throws Exception {
         List<String> lines = classToTest.readRecord();
         assertEquals(4, lines.size());
         lines = classToTest.readRecord();

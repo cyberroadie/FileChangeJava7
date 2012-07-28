@@ -6,6 +6,7 @@ import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -133,6 +134,7 @@ public class MathexRepository implements Runnable {
         } catch (IOException e) {
             return null;
         }
+        Collections.reverse(lines);
         return lines;
     }
 }
