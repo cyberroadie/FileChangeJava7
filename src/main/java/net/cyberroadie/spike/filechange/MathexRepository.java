@@ -98,7 +98,11 @@ public class MathexRepository implements Runnable {
     }
 
     public String getLast() throws IOException {
-        return mathtexService + readLineBackwards();
+        List<String> records = readRecord();
+        if(records != null)
+            return mathtexService + records.get(1);
+        else
+            return null;
     }
 
     public void sendLast() {

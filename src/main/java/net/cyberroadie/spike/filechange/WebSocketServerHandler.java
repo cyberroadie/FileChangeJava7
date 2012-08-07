@@ -153,12 +153,4 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     private static String getWebSocketLocation(HttpRequest req) {
         return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
     }
-
-    public MathexRepository getMathexRepository() {
-        return mathexRepository;
-    }
-
-    public void setMathexRepository(MathexRepository mathexRepository) {
-        this.mathexRepository = mathexRepository;
-    }
 }

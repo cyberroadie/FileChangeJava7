@@ -1,2 +1,5 @@
-.idea
+*.ipr
+*.iws
 *.iml
+.idea/
+local.properties
